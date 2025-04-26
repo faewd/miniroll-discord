@@ -71,7 +71,7 @@ async function home(request: Request) {
 }
 
 function handleCommand({ name, options }: Interaction["data"]) {
-  if (name === "roll") {
+  if (name === "roll" || name === "r") {
     const whisper = options.find((o) => o.name === "whisper")?.value === true;
     const flags = whisper ? 64 : 0;
 

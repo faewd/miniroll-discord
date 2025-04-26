@@ -10,29 +10,33 @@ if (CLIENT_ID === undefined || BOT_TOKEN === undefined) {
 
 const url = `https://discord.com/api/v8/applications/${CLIENT_ID}/commands`;
 
+const rollConfig = {
+  description: "Evaluate dice notation",
+  options: [
+    {
+      name: "dice",
+      description: "The dice notation to evaluate, e.g. 4d6kH3",
+      type: 3,
+      required: true,
+    },
+    {
+      name: "whisper",
+      description: "If set, only you will see the result",
+      type: 5,
+    },
+  ],
+};
+
 const config = {
-  method: "POST",
+  method: "PUT",
   headers: {
     "Content-Type": "application/json",
     "Authorization": `Bot ${BOT_TOKEN}`,
   },
-  body: JSON.stringify({
-    name: "roll",
-    description: "Evaluate dice notation",
-    options: [
-      {
-        name: "dice",
-        description: "The dice notation to evaluate, e.g. 4d6kH3",
-        type: 3,
-        required: true,
-      },
-      {
-        name: "whisper",
-        description: "If set, only you will see the result",
-        type: 5,
-      },
-    ],
-  }),
+  body: JSON.stringify([
+    { name: "roll", ...rollConfig },
+    { name: "r", ...rollConfig },
+  ]),
 };
 
 await fetch(url, config);
