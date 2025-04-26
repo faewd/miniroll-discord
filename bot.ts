@@ -92,11 +92,11 @@ function handleCommand({ name, options }: Interaction["data"]) {
     } catch (err) {
       const detail = err instanceof Error
         ? ("\n```diff\n- " + err.message + "\n```")
-        : "";
+        : "**_An unexpected error ocurred._**";
       return json({
         type: 4,
         data: {
-          content: "## Failed to parse dice notation." + detail,
+          content: detail,
           flags,
         },
       });
@@ -109,7 +109,7 @@ function handleCommand({ name, options }: Interaction["data"]) {
     return json({
       type: 4,
       data: {
-        content: `${normalized} = ${numbers} = **${result}**`,
+        content: `### ${result}\n = \`${normalized}\` = \`${numbers}\``,
         flags,
       },
     });
