@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "run": "deno run -A bot.ts",
+    "register": "deno run -A register.ts"
+  }
+}
