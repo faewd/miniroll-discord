@@ -4,7 +4,8 @@ import {
   validateRequest,
 } from "https://deno.land/x/sift@0.6.0/mod.ts";
 import nacl from "https://esm.sh/tweetnacl@1.0.3?dts";
-import { roll, RollResult } from "npm:miniroll@^1.0.0";
+import { stringify } from "jsr:@std/dotenv/stringify";
+import { EvalResult, roll, RollResult } from "npm:miniroll@^1.0.0";
 
 serve({
   "/": home,
@@ -88,17 +89,37 @@ function handleCommand({ name, options }: Interaction["data"]) {
       });
     }
 
-    const { result } = rollResult;
+    const { result, normalized, calculation } = rollResult;
+
+    const numbers = stringifyCalculation(calculation);
 
     return json({
       type: 4,
       data: {
-        content: `${result}`,
+        content: `${normalized} = ${numbers} = **${result}**`,
       },
     });
   }
 
   return json({ error: "bad request" }, { status: 400 });
+}
+
+function stringifyCalculation(calc: EvalResult): string {
+  switch (calc.kind) {
+    case "num":
+      return `${calc.value}`;
+    case "ident":
+      return `${calc.value}`;
+    case "roll":
+      return `[${
+        [...calc.rolls, ...calc.dropped.map((d) => `~~${d}~~`)].join(" + ")
+      }]`;
+    case "binary": {
+      const lhs = stringifyCalculation(calc.intermediate.lhs);
+      const rhs = stringifyCalculation(calc.intermediate.rhs);
+      return lhs + " " + calc.intermediate.op + " " + rhs;
+    }
+  }
 }
 
 async function verifySignature(
