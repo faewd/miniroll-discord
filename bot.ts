@@ -93,10 +93,13 @@ function handleCommand({ name, options }: Interaction["data"]) {
 
     const numbers = stringifyCalculation(calculation);
 
+    const whisper = options.find((o) => o.name === "whisper")?.value === true;
+
     return json({
       type: 4,
       data: {
         content: `${normalized} = ${numbers} = **${result}**`,
+        flags: whisper ? 64 : 0,
       },
     });
   }
