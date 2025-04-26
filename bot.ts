@@ -5,7 +5,12 @@ import {
 } from "https://deno.land/x/sift@0.6.0/mod.ts";
 import nacl from "https://esm.sh/tweetnacl@1.0.3?dts";
 import { stringify } from "jsr:@std/dotenv/stringify";
-import { EvalResult, roll, RollResult } from "npm:miniroll@^1.0.0";
+import {
+  EvalResult,
+  MinirollError,
+  roll,
+  RollResult,
+} from "npm:miniroll@^1.0.0";
 
 serve({
   "/": home,
@@ -67,12 +72,16 @@ async function home(request: Request) {
 
 function handleCommand({ name, options }: Interaction["data"]) {
   if (name === "roll") {
+    const whisper = options.find((o) => o.name === "whisper")?.value === true;
+    const flags = whisper ? 64 : 0;
+
     const dice = options.find((o) => o.name === "dice");
     if (dice === undefined) {
       return json({
         type: 4,
         data: {
           content: "No dice notation given.",
+          flags,
         },
       });
     }
@@ -80,11 +89,15 @@ function handleCommand({ name, options }: Interaction["data"]) {
     let rollResult: RollResult;
     try {
       rollResult = roll(dice.value as string);
-    } catch (_) {
+    } catch (err) {
+      const detail = err instanceof MinirollError
+        ? ("\n```diff\n- " + err.message + "\n```")
+        : "";
       return json({
         type: 4,
         data: {
-          content: "Failed to parse dice notation.",
+          content: "## Failed to parse dice notation." + detail,
+          flags,
         },
       });
     }
@@ -93,13 +106,11 @@ function handleCommand({ name, options }: Interaction["data"]) {
 
     const numbers = stringifyCalculation(calculation);
 
-    const whisper = options.find((o) => o.name === "whisper")?.value === true;
-
     return json({
       type: 4,
       data: {
         content: `${normalized} = ${numbers} = **${result}**`,
-        flags: whisper ? 64 : 0,
+        flags,
       },
     });
   }
