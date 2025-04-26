@@ -90,7 +90,7 @@ function handleCommand({ name, options }: Interaction["data"]) {
     try {
       rollResult = roll(dice.value as string);
     } catch (err) {
-      const detail = err instanceof MinirollError
+      const detail = err instanceof Error
         ? ("\n```diff\n- " + err.message + "\n```")
         : "";
       return json({
