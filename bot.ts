@@ -109,7 +109,7 @@ function handleCommand({ name, options }: Interaction["data"]) {
     return json({
       type: 4,
       data: {
-        content: `### ${result}\n = \`${normalized}\` = \`${numbers}\``,
+        content: `### ${result}\n = \`${normalized}\` = ${numbers}`,
         flags,
       },
     });
