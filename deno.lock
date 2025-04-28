@@ -3,9 +3,7 @@
   "specifiers": {
     "jsr:@std/dotenv@*": "0.225.3",
     "npm:@types/node@*": "22.12.0",
-    "npm:miniroll@1": "1.0.1",
-    "npm:miniroll@1.1.0": "1.1.0",
-    "npm:miniroll@^1.1.0": "1.1.0"
+    "npm:miniroll@1.1.1": "1.1.1"
   },
   "jsr": {
     "@std/dotenv@0.225.3": {
@@ -19,11 +17,8 @@
         "undici-types"
       ]
     },
-    "miniroll@1.0.1": {
-      "integrity": "sha512-EzTgax0/ajGmA4O2xwYVpH+XXWh+5L3ixgu2rcwQn7xTDGTtEGOcPW0MdS8Vg66QACGEVVrO7+kUDOoWFD9paA=="
-    },
-    "miniroll@1.1.0": {
-      "integrity": "sha512-z5fewcQtgtLaZnGjwx0/IAE3uPZLDiVTTmJDA8kNCh80zXs7IcpvIIvjiOfFkyoHM+Rj/J4TCDBGD0aW/nJqyQ=="
+    "miniroll@1.1.1": {
+      "integrity": "sha512-VhhWxJkZwQ73dHAdFkrNf0MQkqVdRU851VFC3l+IWAWWPN4I0JrJsHl7GbjrQHKxphVzWS2jbWoJXhNLD855gQ=="
     },
     "undici-types@6.20.0": {
       "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
