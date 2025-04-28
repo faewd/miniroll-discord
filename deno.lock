@@ -3,7 +3,8 @@
   "specifiers": {
     "jsr:@std/dotenv@*": "0.225.3",
     "npm:@types/node@*": "22.12.0",
-    "npm:miniroll@1.1.1": "1.1.1"
+    "npm:miniroll@1.1.1": "1.1.1",
+    "npm:miniroll@1.1.2": "1.1.2"
   },
   "jsr": {
     "@std/dotenv@0.225.3": {
@@ -19,6 +20,9 @@
     },
     "miniroll@1.1.1": {
       "integrity": "sha512-VhhWxJkZwQ73dHAdFkrNf0MQkqVdRU851VFC3l+IWAWWPN4I0JrJsHl7GbjrQHKxphVzWS2jbWoJXhNLD855gQ=="
+    },
+    "miniroll@1.1.2": {
+      "integrity": "sha512-gYK93JnGJCTafgRKHcRE3DTTY7nAdm/8tFcr/JQtyUaz8LbMd5RAac9RqY62fURiHi0HXaeBCVCIXLfYHL262g=="
     },
     "undici-types@6.20.0": {
       "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
