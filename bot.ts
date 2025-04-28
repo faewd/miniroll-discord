@@ -4,7 +4,7 @@ import {
   validateRequest,
 } from "https://deno.land/x/sift@0.6.0/mod.ts";
 import nacl from "https://esm.sh/tweetnacl@1.0.3?dts";
-import { EvalResult, roll, RollResult } from "npm:miniroll@1.1.0";
+import { EvalResult, roll, RollResult } from "npm:miniroll@~1.1.0";
 
 serve({
   "/": home,
