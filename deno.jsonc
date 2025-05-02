@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "run": "deno run -A bot.ts",
+    "run": "deno run -A --unstable-kv bot.ts",
     "register": "deno run -A register.ts"
   }
 }

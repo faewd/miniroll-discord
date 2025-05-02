@@ -36,6 +36,17 @@ const config = {
   body: JSON.stringify([
     { name: "roll", ...rollConfig },
     { name: "r", ...rollConfig },
+    {
+      name: "sync",
+      description: "Sync a character sheet from Ashworth",
+      options: [
+        {
+          name: "id",
+          description: "An Ashworth sheet ID",
+          type: 3,
+        },
+      ],
+    },
   ]),
 };
 
