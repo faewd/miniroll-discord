@@ -8,6 +8,21 @@ import {
 import nacl from "https://esm.sh/tweetnacl@1.0.3?dts";
 import { EvalResult, roll, RollResult } from "npm:miniroll@1.1.2";
 
+import {
+  APIApplicationCommandInteractionDataOption,
+  APIChatInputApplicationCommandInteractionData,
+  APIInteraction,
+  InteractionType,
+  MessageFlags,
+  RESTPatchAPIInteractionFollowupJSONBody,
+} from "npm:discord-api-types/v10";
+
+type CommandOptions = APIApplicationCommandInteractionDataOption<
+  InteractionType.ApplicationCommand
+>[];
+
+type FollowUp = RESTPatchAPIInteractionFollowupJSONBody;
+
 const CLIENT_ID = Deno.env.get("CLIENT_ID");
 const BOT_TOKEN = Deno.env.get("BOT_TOKEN");
 
@@ -17,27 +32,17 @@ serve({
   "/": home,
 });
 
-type Interaction = {
-  type: number;
-  token: string;
-  data: {
-    type: number;
-    name: string;
-    options: Option[];
-  };
-  member: {
-    user: {
-      id: string;
-      username: string;
-    };
-  };
-};
+function response(content: string, ephemeral: boolean = false) {
+  const flags = ephemeral ? MessageFlags.Ephemeral : 0;
+  return json({
+    type: 4,
+    data: { content, flags },
+  });
+}
 
-type Option = {
-  name: string;
-  type: number;
-  value: string | number | boolean;
-};
+function reject(message: string, status: number = 400) {
+  return json({ error: message }, { status });
+}
 
 async function home(request: Request) {
   const { error } = await validateRequest(request, {
@@ -46,85 +51,87 @@ async function home(request: Request) {
     },
   });
   if (error) {
-    return json({ error: error.message }, { status: error.status });
+    return reject(error.message, error.status);
   }
 
   const { valid, body } = await verifySignature(request);
   if (!valid) {
-    return json(
-      { error: "Invalid request" },
-      {
-        status: 401,
-      },
-    );
+    return reject("Invalid request", 401);
   }
 
-  const interaction: Interaction = JSON.parse(body);
+  const interaction: APIInteraction = JSON.parse(body);
 
   const { type, data, token } = interaction;
   const shortToken = token.slice(0, 8);
 
   // PING
   if (type === 1) {
-    return json({
-      type: 1,
-    });
+    return json({ type: 1 });
   }
 
   // APPLICTION COMMAND
   if (type === 2) {
+    const user = interaction.member?.user ?? interaction.user;
+    if (user === undefined) {
+      return reject("Command not issued by user.");
+    }
+
+    if (data.type !== 1) {
+      return reject("Interaction is not from a slash command.");
+    }
+
     console.log(
-      `[${shortToken}] User "${interaction.member.user.username}" issued command \`${
+      `[${shortToken}] User "${user.username}" issued command \`${
         JSON.stringify(data)
       }\``,
     );
-    const uid = interaction.member.user.id;
+
+    const uid = user.id;
 
     handleCommand(data, uid)
-      .then(async (res) => {
-        console.log(
-          `[${shortToken}] Following up with: ${await res.clone().text()}`,
-        );
-        const resData = await res.json();
-        const content = resData.data.content;
+      .then((followUp) => {
+        console.log(`[${shortToken}] Following up with: ${followUp}`);
         return fetch(
-          `https://discord.com/api/webhooks/${CLIENT_ID}/${token}/messages/@original`,
+          `https://discord.com/api/v10/webhooks/${CLIENT_ID}/${token}/messages/@original`,
           {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
               "Authorization": `Bot ${BOT_TOKEN}`,
             },
-            body: JSON.stringify({ content }),
+            body: JSON.stringify(followUp),
           },
         );
       })
       .then(async (res) => {
         if (res.ok) console.log(`[${shortToken}] Followed up.`);
-        else {console.error(
+        else {
+          console.error(
             `[${shortToken}] Error while following up:`,
             await res.text(),
-          );}
+          );
+        }
       })
       .catch((err) => console.error(`[${shortToken}]`, err));
 
+    const whisperOpt = data.options?.find((o) => o.name === "whisper");
+    if (whisperOpt !== undefined && whisperOpt.type !== 5) {
+      return reject("Invalid options");
+    }
+    const whisper = whisperOpt?.value === true;
+    const ephemeral = whisper || data.name === "sync";
+
     console.log(`[${shortToken}] Working on it...`);
-    return json({
-      type: 4,
-      data: {
-        content: "-# _Working on it..._",
-        flags: 64,
-      },
-    });
+    return response("-# _Working on it..._", ephemeral);
   }
 
-  return json({ error: "bad request" }, { status: 400 });
+  return reject("Bad request");
 }
 
 async function handleCommand(
-  { name, options }: Interaction["data"],
+  { name, options }: APIChatInputApplicationCommandInteractionData,
   uid: string,
-): Promise<Response> {
+): Promise<FollowUp | null> {
   switch (name) {
     case "roll":
     case "r":
@@ -133,25 +140,18 @@ async function handleCommand(
       return await handleSyncCommand(options, uid);
   }
 
-  return json({ error: "bad request" }, { status: 400 });
+  return null;
 }
 
 async function handleRollCommand(
-  options: Interaction["data"]["options"],
+  options: CommandOptions | undefined,
   uid: string,
-) {
-  const whisper = options.find((o) => o.name === "whisper")?.value === true;
-  const flags = whisper ? 64 : 0;
-
-  const dice = options.find((o) => o.name === "dice");
+): Promise<FollowUp | null> {
+  const dice = options?.find((o) => o.name === "dice");
   if (dice === undefined) {
-    return json({
-      type: 4,
-      data: {
-        content: "No dice notation given.",
-        flags,
-      },
-    });
+    return { content: "No dice notation given." };
+  } else if (dice.type !== 3) {
+    return null;
   }
 
   const data = new Map<string, number>();
@@ -178,29 +178,17 @@ async function handleRollCommand(
   try {
     rollResult = roll(dice.value as string, { data });
   } catch (err) {
-    const detail = err instanceof Error
+    const content = err instanceof Error
       ? ("\n```diff\n- " + err.message + "\n```")
       : "**_An unexpected error ocurred._**";
-    return json({
-      type: 4,
-      data: {
-        content: detail,
-        flags,
-      },
-    });
+    return { content };
   }
 
   const { result, normalized, calculation } = rollResult;
 
   const numbers = stringifyCalculation(calculation);
 
-  return json({
-    type: 4,
-    data: {
-      content: `### ${result}\n = \`${normalized}\` = ${numbers}`,
-      flags,
-    },
-  });
+  return { content: `### ${result}\n = \`${normalized}\` = ${numbers}` };
 }
 
 function stringifyCalculation(calc: EvalResult): string {
@@ -249,36 +237,27 @@ interface Sheet {
 }
 
 async function handleSyncCommand(
-  options: Interaction["data"]["options"],
+  options: CommandOptions | undefined,
   uid: string,
-) {
-  const newSheetId = options?.find((o) => o.name === "id")?.value as
-    | string
-    | undefined;
+): Promise<FollowUp | null> {
+  const sidOpt = options?.find((o) => o.name === "id");
+  if (sidOpt !== undefined && sidOpt.type !== 3) return null;
 
-  const sheet = newSheetId === undefined
+  const sid = sidOpt?.value;
+
+  const sheet = sid === undefined
     ? await getSyncedSheetForUser(uid)
-    : await syncSheetForUser(uid, newSheetId);
+    : await syncSheetForUser(uid, sid);
 
   if (sheet === null) {
-    return json({
-      type: 4,
-      data: {
-        content: newSheetId
-          ? "**Failed to sync.**\nAre you sure the ID is correct and the sheet is public?"
-          : "**Failed to sync.**\nMake sure your sheet still exists and is public.",
-        flags: 64,
-      },
-    });
+    return {
+      content: sid !== undefined
+        ? "**Failed to sync.**\nAre you sure the ID is correct and the sheet is public?"
+        : "**Failed to sync.**\nMake sure your sheet still exists and is public.",
+    };
   }
 
-  return json({
-    type: 4,
-    data: {
-      content: `Synced character **${sheet.name}**.`,
-      flags: 64,
-    },
-  });
+  return { content: `Synced character **${sheet.name}**.` };
 }
 
 async function getSyncedSheetForUser(uid: string): Promise<Sheet | null> {

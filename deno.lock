@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@std/dotenv@*": "0.225.3",
     "npm:@types/node@*": "22.12.0",
+    "npm:discord-api-types@*": "0.38.2",
     "npm:miniroll@1.1.1": "1.1.1",
     "npm:miniroll@1.1.2": "1.1.2"
   },
@@ -17,6 +18,9 @@
       "dependencies": [
         "undici-types"
       ]
+    },
+    "discord-api-types@0.38.2": {
+      "integrity": "sha512-GAPY1/Kv3aqEoBYgUYXB2tHdWJCZXfytlCzxZ4QMQ1/TIQn1JI+xUOukehl4iEa9m7fCURnMIOpOxpaTWqzX2w=="
     },
     "miniroll@1.1.1": {
       "integrity": "sha512-VhhWxJkZwQ73dHAdFkrNf0MQkqVdRU851VFC3l+IWAWWPN4I0JrJsHl7GbjrQHKxphVzWS2jbWoJXhNLD855gQ=="
