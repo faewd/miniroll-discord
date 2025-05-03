@@ -6,7 +6,7 @@ import {
   validateRequest,
 } from "https://deno.land/x/sift@0.6.0/mod.ts";
 import nacl from "https://esm.sh/tweetnacl@1.0.3?dts";
-import { EvalResult, roll, RollResult } from "npm:miniroll@1.1.2";
+import { EvalResult, roll, RollResult } from "npm:miniroll@1.1.4";
 
 import {
   APIApplicationCommandInteractionDataOption,
@@ -154,25 +154,8 @@ async function handleRollCommand(
     return null;
   }
 
-  const data = new Map<string, number>();
   const sheet = await getSyncedSheetForUser(uid);
-  if (sheet !== null) {
-    const pb = Math.ceil(sheet.level / 4) + 1;
-    data.set("pb", pb);
-    for (
-      const [ability, { base, bonus, tempBonus, proficient }] of Object.entries(
-        sheet.abilityScores,
-      )
-    ) {
-      const score = base + bonus + tempBonus;
-      const modifier = Math.floor((score - 10) / 2);
-      data.set(`${ability}.base`, base);
-      data.set(`${ability}.bonus`, bonus + tempBonus);
-      data.set(`${ability}.score`, score);
-      data.set(`${ability}.save`, modifier + (proficient ? pb : 0));
-      data.set(ability, modifier);
-    }
-  }
+  const data = new Map<string, number>(Object.entries(sheet?.stats ?? {}));
 
   let rollResult: RollResult;
   try {
@@ -207,13 +190,6 @@ function stringifyCalculation(calc: EvalResult): string {
   }
 }
 
-interface AbilityScore {
-  base: number;
-  bonus: number;
-  tempBonus: number;
-  proficient: boolean;
-}
-
 interface Sheet {
   id: string;
   owner: {
@@ -226,14 +202,7 @@ interface Sheet {
   species: string;
   class: string;
   level: number;
-  abilityScores: {
-    str: AbilityScore;
-    dex: AbilityScore;
-    con: AbilityScore;
-    int: AbilityScore;
-    wis: AbilityScore;
-    cha: AbilityScore;
-  };
+  stats: Record<string, number>;
 }
 
 async function handleSyncCommand(
