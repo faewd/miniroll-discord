@@ -1,16 +1,14 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@std/dotenv@*": "0.225.3",
+    "jsr:@std/dotenv@*": "0.225.5",
     "npm:@types/node@*": "22.12.0",
-    "npm:discord-api-types@*": "0.38.2",
-    "npm:miniroll@1.1.1": "1.1.1",
-    "npm:miniroll@1.1.2": "1.1.2",
+    "npm:discord-api-types@*": "0.38.13",
     "npm:miniroll@1.1.4": "1.1.4"
   },
   "jsr": {
-    "@std/dotenv@0.225.3": {
-      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
+    "@std/dotenv@0.225.5": {
+      "integrity": "9ce6f9d0ec3311f74a32535aa1b8c62ed88b1ab91b7f0815797d77a6f60c922f"
     }
   },
   "npm": {
@@ -20,14 +18,8 @@
         "undici-types"
       ]
     },
-    "discord-api-types@0.38.2": {
-      "integrity": "sha512-GAPY1/Kv3aqEoBYgUYXB2tHdWJCZXfytlCzxZ4QMQ1/TIQn1JI+xUOukehl4iEa9m7fCURnMIOpOxpaTWqzX2w=="
-    },
-    "miniroll@1.1.1": {
-      "integrity": "sha512-VhhWxJkZwQ73dHAdFkrNf0MQkqVdRU851VFC3l+IWAWWPN4I0JrJsHl7GbjrQHKxphVzWS2jbWoJXhNLD855gQ=="
-    },
-    "miniroll@1.1.2": {
-      "integrity": "sha512-gYK93JnGJCTafgRKHcRE3DTTY7nAdm/8tFcr/JQtyUaz8LbMd5RAac9RqY62fURiHi0HXaeBCVCIXLfYHL262g=="
+    "discord-api-types@0.38.13": {
+      "integrity": "sha512-FELWJRgLVQuR7Az8RhdEZE0k6QNjSW9PCUcU1iyP2Gke8HrJmnMceSS9pD93UM64s3tvZzJPajpPLjWZJylf4g=="
     },
     "miniroll@1.1.4": {
       "integrity": "sha512-bwcndifryXcc6msEggUyu3p67Ml2dnyApJvQbfJjiglNRRzWrbuDuOWliu9Nt4mU+SvEyI2E0Ih8RjIGR0RyDQ=="
@@ -37,13 +29,11 @@
     }
   },
   "redirects": {
-    "https://deno.land/x/sift": "https://deno.land/x/sift@0.6.0",
-    "https://esm.sh/preact@%3E=10?target=deno": "https://esm.sh/preact@10.26.5?target=deno",
-    "https://esm.sh/tweetnacl?dts": "https://esm.sh/tweetnacl@1.0.3?dts"
+    "https://esm.sh/preact@%3E=10?target=deno": "https://esm.sh/preact@10.26.9?target=deno"
   },
   "remote": {
-    "https://cdn.skypack.dev/-/http-cache-semantics@v4.1.1-N0bWdwKGKLbWpVco6TJA/dist=es2019,mode=imports/optimized/http-cache-semantics.js": "d2b8a8ddda629c7a915c269ecad2ba761cacad5c6e21bbf34381def053702294",
-    "https://cdn.skypack.dev/http-cache-semantics?dts": "351196d5e6d6b0cd41d8cfcc73f9a741532c8ac5ff1686a2c86d554a2a3dc993",
+    "https://cdn.skypack.dev/-/http-cache-semantics@v4.2.0-ayuitodc3NV7l3LbWgow/dist=es2019,mode=imports/optimized/http-cache-semantics.js": "5f802d4772ba7f919ebcce41d2b1f3d811f366f08397e30adccee15ff34b379b",
+    "https://cdn.skypack.dev/http-cache-semantics?dts": "5690b9a5ba7c641515a9c74ea28b858098844a841e7d32defb85d01da9c88249",
     "https://deno.land/std@0.118.0/_util/assert.ts": "2f868145a042a11d5ad0a3c748dcf580add8a0dbc0e876eaa0026303a5488f58",
     "https://deno.land/std@0.118.0/_util/os.ts": "dfb186cc4e968c770ab6cc3288bd65f4871be03b93beecae57d657232ecffcac",
     "https://deno.land/std@0.118.0/path/_constants.ts": "1247fee4a79b70c89f23499691ef169b41b6ccf01887a0abd131009c5581b853",
@@ -77,8 +67,8 @@
     "https://esm.sh/preact-render-to-string@5.2.4?target=deno": "0009f408a73870741bbada82699372da56e39f5ef19d909bdff53bd5a122546b",
     "https://esm.sh/preact@10.10.6/deno/preact.mjs": "faed151e239af5a78b535bbef420f14da067eee75418f2dff3443d7649e879e5",
     "https://esm.sh/preact@10.10.6?target=deno": "79dd3cfa108f7f73fddc1695f66267cd81e536158ca99b58571ea809818516f5",
-    "https://esm.sh/preact@10.26.5/deno/preact.mjs": "d8fd34a8324d1d4df0e3c03c6343d36214d09fe03862a1119640f2de0f80e916",
-    "https://esm.sh/preact@10.26.5?target=deno": "ade48d448b0bee907552c19925efb6a296c5af7c00f4fb9ae3780c0ffd0c7652",
+    "https://esm.sh/preact@10.26.9/deno/preact.mjs": "4cd7a49dac13e586b0e110cfa468caa933fd3dc7c101de55642a3771a4f242cf",
+    "https://esm.sh/preact@10.26.9?target=deno": "e72535ae42ba7b7a8d6ead8ecf88a1b301b34554d69aaf304cb2a146e633fe53",
     "https://esm.sh/tweetnacl@1.0.3/denonext/tweetnacl.mjs": "2a972244e194f6e965cbe26ddc858dab7642621548d432d8f666b31f2b7c6d31",
     "https://esm.sh/tweetnacl@1.0.3?dts": "278caeeeb136b538b5839595306abfe0ed8e0263a990a446fd30d89aaef9a8c5"
   }

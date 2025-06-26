@@ -97,7 +97,7 @@ async function home(request: Request) {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bot ${BOT_TOKEN}`,
+              Authorization: `Bot ${BOT_TOKEN}`,
             },
             body: JSON.stringify(followUp),
           },
@@ -162,7 +162,7 @@ async function handleRollCommand(
     rollResult = roll(dice.value as string, { data });
   } catch (err) {
     const content = err instanceof Error
-      ? ("\n```diff\n- " + err.message + "\n```")
+      ? "\n```diff\n- " + err.message + "\n```"
       : "**_An unexpected error ocurred._**";
     return { content };
   }
@@ -225,7 +225,7 @@ async function handleSyncCommand(
         : "**Failed to sync.**\nMake sure your sheet still exists and is public.",
     };
   }
-
+  console.log(sheet);
   return { content: `Synced character **${sheet.name}**.` };
 }
 
@@ -268,7 +268,5 @@ async function verifySignature(
 }
 
 function hexToUint8Array(hex: string) {
-  return new Uint8Array(
-    hex.match(/.{1,2}/g)!.map((val) => parseInt(val, 16)),
-  );
+  return new Uint8Array(hex.match(/.{1,2}/g)!.map((val) => parseInt(val, 16)));
 }
