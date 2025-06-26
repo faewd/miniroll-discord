@@ -225,7 +225,6 @@ async function handleSyncCommand(
         : "**Failed to sync.**\nMake sure your sheet still exists and is public.",
     };
   }
-  console.log(sheet);
   return { content: `Synced character **${sheet.name}**.` };
 }
 
@@ -242,6 +241,10 @@ async function syncSheetForUser(
 ): Promise<Sheet | null> {
   try {
     const res = await fetch(`https://ashworth.fivee.co/api/characters/${sid}`);
+    if (!res.ok) {
+      console.error(await res.json());
+      return null;
+    }
     const sheet = await res.json();
     await kv.set(["syncedSheet", uid], sheet);
     return sheet;
