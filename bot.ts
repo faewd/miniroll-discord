@@ -299,7 +299,7 @@ async function handleSpellCommand(
       return { content: "Failed to fetch spell data." };
     }
 
-    data = await res.json();
+    ({ data } = await res.json());
   } catch (err) {
     console.error(err);
     return { content: "Unexpected error fetching spell data." };
