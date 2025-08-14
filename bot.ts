@@ -35,8 +35,14 @@ serve({
   "/": home,
 });
 
-function response(content: string, ephemeral: boolean = false) {
-  const flags = ephemeral ? MessageFlags.Ephemeral : 0;
+function response(
+  content: string,
+  ephemeral: boolean = false,
+  components: boolean = false,
+) {
+  let flags = 0;
+  if (ephemeral) flags += MessageFlags.Ephemeral;
+  if (components) flags += MessageFlags.IsComponentsV2;
   return json({
     type: 4,
     data: { content, flags },
@@ -123,9 +129,10 @@ async function home(request: Request) {
     }
     const whisper = whisperOpt?.value === true;
     const ephemeral = whisper || data.name === "sync";
+    const components = data.name === "spell";
 
     console.log(`[${shortToken}] Working on it...`);
-    return response("-# _Working on it..._", ephemeral);
+    return response("-# _Working on it..._", ephemeral, components);
   }
 
   return reject("Bad request");
@@ -296,19 +303,26 @@ async function handleSpellCommand(
 
     if (!res.ok) {
       console.error(await res.text());
-      return { content: "Failed to fetch spell data." };
+      return {
+        components: [{
+          "type": 10,
+          "content": "Failed to fetch spell data.",
+        }],
+      };
     }
 
     response = await res.json();
   } catch (err) {
     console.error(err);
-    return { content: "Unexpected error fetching spell data." };
+    return {
+      components: [{
+        "type": 10,
+        "content": "Unexpected error fetching spell data.",
+      }],
+    };
   }
 
-  console.log(response);
-
   const data = response.data;
-
   const spell = data.spell ??
     (data.spells.length === 0 ? data.spells[0] : null);
 
@@ -326,16 +340,27 @@ async function handleSpellCommand(
   }
 
   if (data.spells.length === 0) {
-    return { content: `Couldn't find a spell with that name or ID.` };
+    return {
+      components: [{
+        "type": 10,
+        "content": "Couldn't find a spell with that name or ID.",
+      }],
+    };
   }
 
   return {
     content: "Which spell?",
-    components: data.spells.map((spell: { id: string }) => ({
-      type: ComponentType.Button,
-      customId: `btn-${shortToken}-${spell.id}`,
-      style: ButtonStyle.Primary,
-    })),
+    components: [
+      {
+        "type": 10,
+        "content": "**Which spell?**",
+      },
+      ...data.spells.map((spell: { id: string }) => ({
+        type: ComponentType.Button,
+        customId: `btn-${shortToken}-${spell.id}`,
+        style: ButtonStyle.Primary,
+      })),
+    ],
   };
 }
 
