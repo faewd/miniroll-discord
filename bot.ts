@@ -270,7 +270,7 @@ async function handleSpellCommand(
     return { content: "Invalid command arguments." };
   }
 
-  let data;
+  let response;
   try {
     const res = await fetch(`https://fivee.co/graphql`, {
       method: "POST",
@@ -299,11 +299,15 @@ async function handleSpellCommand(
       return { content: "Failed to fetch spell data." };
     }
 
-    ({ data } = await res.json());
+    response = await res.json();
   } catch (err) {
     console.error(err);
     return { content: "Unexpected error fetching spell data." };
   }
+
+  console.log(response);
+
+  const data = response.data;
 
   const spell = data.spell ??
     (data.spells.length === 0 ? data.spells[0] : null);
