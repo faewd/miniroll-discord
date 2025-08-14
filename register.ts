@@ -47,6 +47,18 @@ const config = {
         },
       ],
     },
+    {
+      name: "spell",
+      description: "Embed a spell card.",
+      options: [
+        {
+          name: "name",
+          description: "The name or ID of the spell",
+          type: 3,
+          required: true,
+        },
+      ],
+    },
   ]),
 };
 

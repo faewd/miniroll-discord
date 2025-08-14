@@ -138,6 +138,8 @@ async function handleCommand(
       return await handleRollCommand(options, uid);
     case "sync":
       return await handleSyncCommand(options, uid);
+    case "spell":
+      return await handleSpellCommand(options, uid);
   }
 
   return null;
@@ -252,6 +254,55 @@ async function syncSheetForUser(
     console.error(err);
     return null;
   }
+}
+
+async function handleSpellCommand(
+  options: CommandOptions | undefined,
+  _uid: string,
+): Promise<FollowUp | null> {
+  const searchTermOpt = options?.find((o) => o.name === "name");
+  if (searchTermOpt === undefined || searchTermOpt.type !== 3) {
+    return { content: "Invalid command arguments." };
+  }
+
+  let data;
+  try {
+    const res = await fetch(`https://fivee.co/graphql`, {
+      body: JSON.stringify({
+        query: `#graphql
+          query ($q: String!) {
+            spells(filters:  {name_ilike: $q}) {
+              name
+            }
+            spell(id: $q) {
+              name
+            }
+          }
+        `,
+        variables: {
+          q: searchTermOpt.value,
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      console.error(await res.text());
+      return { content: "Failed to fetch spell data." };
+    }
+
+    data = await res.json();
+  } catch (err) {
+    console.error(err);
+    return { content: "Unexpected error fetching spell data." };
+  }
+
+  return {
+    content: `
+\`\`\`json
+${JSON.stringify(data)}
+\`\`\`
+      `,
+  };
 }
 
 async function verifySignature(
