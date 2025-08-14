@@ -268,6 +268,7 @@ async function handleSpellCommand(
   let data;
   try {
     const res = await fetch(`https://fivee.co/graphql`, {
+      method: "POST",
       body: JSON.stringify({
         query: `#graphql
           query ($q: String!) {
