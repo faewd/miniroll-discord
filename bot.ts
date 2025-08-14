@@ -12,6 +12,9 @@ import {
   APIApplicationCommandInteractionDataOption,
   APIChatInputApplicationCommandInteractionData,
   APIInteraction,
+  ButtonStyle,
+  ComponentType,
+  EmbedType,
   InteractionType,
   MessageFlags,
   RESTPatchAPIInteractionFollowupJSONBody,
@@ -88,7 +91,7 @@ async function home(request: Request) {
 
     const uid = user.id;
 
-    handleCommand(data, uid)
+    handleCommand(data, uid, shortToken)
       .then((followUp) => {
         console.log(`[${shortToken}] Following up with: ${followUp}`);
         return fetch(
@@ -131,6 +134,7 @@ async function home(request: Request) {
 async function handleCommand(
   { name, options }: APIChatInputApplicationCommandInteractionData,
   uid: string,
+  shortToken: string,
 ): Promise<FollowUp | null> {
   switch (name) {
     case "roll":
@@ -139,7 +143,7 @@ async function handleCommand(
     case "sync":
       return await handleSyncCommand(options, uid);
     case "spell":
-      return await handleSpellCommand(options, uid);
+      return await handleSpellCommand(options, uid, shortToken);
   }
 
   return null;
@@ -259,6 +263,7 @@ async function syncSheetForUser(
 async function handleSpellCommand(
   options: CommandOptions | undefined,
   _uid: string,
+  shortToken: string,
 ): Promise<FollowUp | null> {
   const searchTermOpt = options?.find((o) => o.name === "name");
   if (searchTermOpt === undefined || searchTermOpt.type !== 3) {
@@ -276,10 +281,10 @@ async function handleSpellCommand(
         query: `#graphql
           query ($q: String!) {
             spells(filters:  {name_ilike: $q}) {
-              name
+              id
             }
             spell(id: $q) {
-              name
+              id
             }
           }
         `,
@@ -300,12 +305,33 @@ async function handleSpellCommand(
     return { content: "Unexpected error fetching spell data." };
   }
 
+  const spell = data.spell ??
+    (data.spells.length === 0 ? data.spells[0] : null);
+
+  if (spell !== null) {
+    return {
+      embeds: [
+        {
+          type: EmbedType.Image,
+          image: {
+            url: `https://fivee.co/snippets/spell-card/${spell.id}`,
+          },
+        },
+      ],
+    };
+  }
+
+  if (data.spells.length === 0) {
+    return { content: `Couldn't find a spell with that name or ID.` };
+  }
+
   return {
-    content: `
-\`\`\`json
-${JSON.stringify(data)}
-\`\`\`
-      `,
+    content: "Which spell?",
+    components: data.spells.map((spell: { id: string }) => ({
+      type: ComponentType.Button,
+      customId: `btn-${shortToken}-${spell.id}`,
+      style: ButtonStyle.Primary,
+    })),
   };
 }
 
