@@ -14,6 +14,7 @@ import {
   APIInteraction,
   ButtonStyle,
   ComponentType,
+  InteractionResponseType,
   InteractionType,
   MessageFlags,
   RESTPatchAPIInteractionFollowupJSONBody,
@@ -129,6 +130,32 @@ async function home(request: Request) {
 
     console.log(`[${shortToken}] Working on it...`);
     return response("-# _Working on it..._", ephemeral, components);
+  }
+
+  // BUTTON CLICK
+  if (type === InteractionType.MessageComponent) {
+    const buttonid = interaction.data.custom_id;
+    const { value } = await kv.get(["continuation", buttonid]);
+    if (value === undefined) {
+      return json({
+        type: InteractionResponseType.UpdateMessage,
+        data: {
+          flags: MessageFlags.IsComponentsV2,
+          components: [{
+            type: ComponentType.TextDisplay,
+            content: `_Failed to fetch spell. Had the interaction expired?_`,
+          }],
+        },
+      });
+    }
+
+    return json({
+      type: InteractionResponseType.UpdateMessage,
+      data: {
+        flags: MessageFlags.IsComponentsV2,
+        ...value,
+      },
+    });
   }
 
   return reject("Bad request");
