@@ -484,7 +484,7 @@ async function handleSpellCommand(
       {
         "type": ComponentType.TextDisplay,
         "content": `-# Expires <t:${
-          (Math.floor(Date.now() / 1000) + expireIn - expiryBuffer).toFixed(0)
+          (Math.floor((Date.now() + expireIn - expiryBuffer) / 1000)).toFixed(0)
         }:R>`,
       },
     ],
