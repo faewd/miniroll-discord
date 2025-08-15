@@ -128,6 +128,12 @@ async function tryFollowUp(
   let followedUp = false;
   let attempts = 0;
   do {
+    if (attempts > 3) {
+      console.error(
+        `[${shortToken}] Max follow-up attempts exceeded. Aborting.`,
+      );
+      return;
+    }
     if (attempts++ > 0) {
       console.log(
         `[${shortToken}] Follow-up failed, trying again in 2 seconds.`,
