@@ -30,6 +30,22 @@ const BOT_TOKEN = Deno.env.get("BOT_TOKEN");
 
 const kv = await Deno.openKv();
 
+kv.listenQueue((value) => {
+  if (value.kind === "followUp") {
+    if (
+      !value.followUp || typeof value.followUp !== "object" || !value.token ||
+      !value.shortToken
+    ) {
+      console.error(`Invalid followUp queue item: ${JSON.stringify(value)}`);
+      return;
+    }
+
+    tryFollowUp(value.followUp, value.token, value.shortToken);
+  }
+
+  console.error(`Unexpected queue item: ${JSON.stringify(value)}`);
+});
+
 serve({
   "/": home,
 });
@@ -99,7 +115,7 @@ async function home(request: Request) {
 
     const uid = user.id;
 
-    handleCommand(data, uid, shortToken)
+    handleCommand(data, uid, token, shortToken)
       .then((followUp) => tryFollowUp(followUp, token, shortToken));
 
     const whisperOpt = data.options?.find((o) => o.name === "whisper");
@@ -184,6 +200,7 @@ async function followUpWith(
 async function handleCommand(
   { name, options }: APIChatInputApplicationCommandInteractionData,
   uid: string,
+  token: string,
   shortToken: string,
 ): Promise<FollowUp | null> {
   switch (name) {
@@ -193,7 +210,7 @@ async function handleCommand(
     case "sync":
       return await handleSyncCommand(options, uid);
     case "spell":
-      return await handleSpellCommand(options, uid, shortToken);
+      return await handleSpellCommand(options, uid, token, shortToken);
   }
 
   return null;
@@ -313,6 +330,7 @@ async function syncSheetForUser(
 async function handleSpellCommand(
   options: CommandOptions | undefined,
   _uid: string,
+  token: string,
   shortToken: string,
 ): Promise<FollowUp | null> {
   const searchTermOpt = options?.find((o) => o.name === "name");
@@ -405,6 +423,47 @@ async function handleSpellCommand(
     };
   }
 
+  const expireIn = 10 * 60 * 1000;
+  const expiryBuffer = 5 * 1000;
+
+  kv.enqueue({
+    kind: "followUp",
+    token,
+    shortToken,
+    followUp: {
+      components: [
+        {
+          "type": ComponentType.TextDisplay,
+          "content": "-# This interaction has expired.",
+        },
+      ],
+    },
+  }, { delay: expireIn - expiryBuffer });
+
+  for (const spell of data.spells) {
+    kv.set(
+      ["continuation", `btn-${shortToken}-${spell.id}`],
+      {
+        components: [
+          {
+            type: ComponentType.MediaGallery,
+            items: [{
+              media: {
+                url: `https://fivee.co/snippets/spell-card/${spell.id}.png`,
+              },
+              description: `${spell.name} spell card`,
+            }],
+          },
+          {
+            type: ComponentType.TextDisplay,
+            content: `-# https://fivee.co/snippets/spell-card/${spell.id}`,
+          },
+        ],
+      },
+      { expireIn },
+    );
+  }
+
   return {
     components: [
       {
@@ -421,6 +480,12 @@ async function handleSpellCommand(
           style: ButtonStyle.Primary,
           label: spell.name,
         })),
+      },
+      {
+        "type": ComponentType.TextDisplay,
+        "content": `-# Expires <t:${
+          (Math.floor(Date.now() / 1000) + expireIn - expiryBuffer).toFixed(0)
+        }:R>`,
       },
     ],
   };
