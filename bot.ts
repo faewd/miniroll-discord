@@ -374,7 +374,7 @@ async function handleSpellCommand(
 
   const data = response.data;
   const spell = data.spell ??
-    (data.spells.length === 0 ? data.spells[0] : null);
+    (data.spells.length === 1 ? data.spells[0] : null);
 
   if (spell !== null) {
     return {
