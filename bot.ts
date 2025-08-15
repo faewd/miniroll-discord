@@ -42,7 +42,7 @@ function response(
 ) {
   let flags = 0;
   if (ephemeral) flags |= MessageFlags.Ephemeral;
-  if (components) flags |= MessageFlags.IsComponentsV2;
+  // if (components) flags |= MessageFlags.IsComponentsV2;
   return json({
     type: 4,
     data: { content, flags },
@@ -124,7 +124,7 @@ async function tryFollowUp(
     console.log(`[${shortToken}] Done, no follow-up.`);
     return;
   }
-  console.log(`[${shortToken}] Following up with: ${followUp}`);
+  console.log(`[${shortToken}] Following up with: ${JSON.stringify(followUp)}`);
   let followedUp = false;
   let attempts = 0;
   do {
