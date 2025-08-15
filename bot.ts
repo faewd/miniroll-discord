@@ -68,6 +68,7 @@ function response(
 }
 
 function reject(message: string, status: number = 400) {
+  console.log(`Rejected: ${message}`);
   return json({ error: message }, { status });
 }
 
