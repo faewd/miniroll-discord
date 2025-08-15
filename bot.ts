@@ -317,7 +317,12 @@ async function handleSpellCommand(
 ): Promise<FollowUp | null> {
   const searchTermOpt = options?.find((o) => o.name === "name");
   if (searchTermOpt === undefined || searchTermOpt.type !== 3) {
-    return { content: "Invalid command arguments." };
+    return {
+      components: [{
+        "type": ComponentType.TextDisplay,
+        content: "Invalid command arguments.",
+      }],
+    };
   }
 
   let response;
@@ -394,7 +399,6 @@ async function handleSpellCommand(
   }
 
   return {
-    content: "Which spell?",
     components: [
       {
         "type": ComponentType.TextDisplay,
