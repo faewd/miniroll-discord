@@ -369,12 +369,13 @@ async function handleSpellCommand(
 
   if (spell !== null) {
     return {
-      embeds: [
+      components: [
         {
-          type: EmbedType.Image,
-          image: {
-            url: `https://fivee.co/snippets/spell-card/${spell.id}`,
-          },
+          type: ComponentType.MediaGallery,
+          items: [{
+            media: { url: `https://fivee.co/snippets/spell-card/${spell.id}` },
+            description: `https://fivee.co/snippets/spell-card/${spell.id}`,
+          }],
         },
       ],
     };
