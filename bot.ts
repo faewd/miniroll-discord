@@ -335,6 +335,7 @@ async function handleSpellCommand(
             }
             spell(id: $q) {
               id
+              name
             }
           }
         `,
@@ -401,10 +402,14 @@ async function handleSpellCommand(
       },
       {
         "type": ComponentType.ActionRow,
-        "components": data.spells.map((spell: { id: string }) => ({
+        "components": data.spells.map((
+          spell: { id: string; name: string },
+        ) => ({
           type: ComponentType.Button,
           custom_id: `btn-${shortToken}-${spell.id}`,
           style: ButtonStyle.Primary,
+          message: spell.name,
+          label: spell.name,
         })),
       },
     ],
