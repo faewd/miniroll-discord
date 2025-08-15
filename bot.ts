@@ -42,9 +42,12 @@ function response(
   let flags = 0;
   if (ephemeral) flags |= MessageFlags.Ephemeral;
   if (components) flags |= MessageFlags.IsComponentsV2;
+  const contentFields = components
+    ? { components: [{ type: ComponentType.TextDisplay, content }] }
+    : { content };
   return json({
     type: 4,
-    data: { content, flags },
+    data: { flags, ...contentFields },
   });
 }
 
