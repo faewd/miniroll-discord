@@ -403,7 +403,7 @@ async function handleSpellCommand(
         "type": ComponentType.ActionRow,
         "components": data.spells.map((spell: { id: string }) => ({
           type: ComponentType.Button,
-          customId: `btn-${shortToken}-${spell.id}`,
+          custom_id: `btn-${shortToken}-${spell.id}`,
           style: ButtonStyle.Primary,
         })),
       },
