@@ -451,6 +451,8 @@ async function handleSpellCommand(
     };
   }
 
+  const spellOptions = data.spells.slice(0, 5);
+
   const expireIn = 10 * 60 * 1000;
   const expiryBuffer = 5 * 1000;
 
@@ -468,7 +470,7 @@ async function handleSpellCommand(
     },
   }, { delay: expireIn - expiryBuffer });
 
-  for (const spell of data.spells) {
+  for (const spell of spellOptions) {
     kv.set(
       ["continuation", `btn-${shortToken}-${spell.id}`],
       {
@@ -500,7 +502,7 @@ async function handleSpellCommand(
       },
       {
         "type": ComponentType.ActionRow,
-        "components": data.spells.map((
+        "components": spellOptions.map((
           spell: { id: string; name: string },
         ) => ({
           type: ComponentType.Button,
