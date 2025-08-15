@@ -41,8 +41,8 @@ function response(
   components: boolean = false,
 ) {
   let flags = 0;
-  if (ephemeral) flags += MessageFlags.Ephemeral;
-  if (components) flags += MessageFlags.IsComponentsV2;
+  if (ephemeral) flags |= MessageFlags.Ephemeral;
+  if (components) flags |= MessageFlags.IsComponentsV2;
   return json({
     type: 4,
     data: { content, flags },
@@ -71,7 +71,7 @@ async function home(request: Request) {
   const interaction: APIInteraction = JSON.parse(body);
 
   const { type, data, token } = interaction;
-  const shortToken = token.slice(0, 8);
+  const shortToken = token.slice(token.length - 8, token.length);
 
   // PING
   if (type === 1) {
@@ -98,30 +98,7 @@ async function home(request: Request) {
     const uid = user.id;
 
     handleCommand(data, uid, shortToken)
-      .then((followUp) => {
-        console.log(`[${shortToken}] Following up with: ${followUp}`);
-        return fetch(
-          `https://discord.com/api/v10/webhooks/${CLIENT_ID}/${token}/messages/@original`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bot ${BOT_TOKEN}`,
-            },
-            body: JSON.stringify(followUp),
-          },
-        );
-      })
-      .then(async (res) => {
-        if (res.ok) console.log(`[${shortToken}] Followed up.`);
-        else {
-          console.error(
-            `[${shortToken}] Error while following up:`,
-            await res.text(),
-          );
-        }
-      })
-      .catch((err) => console.error(`[${shortToken}]`, err));
+      .then((followUp) => tryFollowUp(followUp, token, shortToken));
 
     const whisperOpt = data.options?.find((o) => o.name === "whisper");
     if (whisperOpt !== undefined && whisperOpt.type !== 5) {
@@ -136,6 +113,64 @@ async function home(request: Request) {
   }
 
   return reject("Bad request");
+}
+
+async function tryFollowUp(
+  followUp: FollowUp | null,
+  token: string,
+  shortToken: string,
+) {
+  if (followUp === null) {
+    console.log(`[${shortToken}] Done, no follow-up.`);
+    return;
+  }
+  console.log(`[${shortToken}] Following up with: ${followUp}`);
+  let followedUp = false;
+  let attempts = 0;
+  do {
+    if (attempts++ > 0) {
+      console.log(
+        `[${shortToken}] Follow-up failed, trying again in 2 seconds.`,
+      );
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    followedUp = await followUpWith(followUp, token, shortToken);
+  } while (!followedUp);
+  console.log(`[${shortToken}] Followed up successfully.`);
+}
+
+async function followUpWith(
+  followUp: FollowUp,
+  token: string,
+  shortToken: string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `https://discord.com/api/v10/webhooks/${CLIENT_ID}/${token}/messages/@original`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bot ${BOT_TOKEN}`,
+        },
+        body: JSON.stringify(followUp),
+      },
+    );
+
+    if (res.ok) {
+      console.log(`[${shortToken}] Followed up.`);
+      return true;
+    } else {
+      console.error(
+        `[${shortToken}] Error while following up:`,
+        await res.text(),
+      );
+      return false;
+    }
+  } catch (err) {
+    console.error(`[${shortToken}]`, err);
+    return false;
+  }
 }
 
 async function handleCommand(
