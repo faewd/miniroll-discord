@@ -399,11 +399,14 @@ async function handleSpellCommand(
         "type": ComponentType.TextDisplay,
         "content": "**Which spell?**",
       },
-      ...data.spells.map((spell: { id: string }) => ({
-        type: ComponentType.Button,
-        customId: `btn-${shortToken}-${spell.id}`,
-        style: ButtonStyle.Primary,
-      })),
+      {
+        "type": ComponentType.ActionRow,
+        "components": data.spells.map((spell: { id: string }) => ({
+          type: ComponentType.Button,
+          customId: `btn-${shortToken}-${spell.id}`,
+          style: ButtonStyle.Primary,
+        })),
+      },
     ],
   };
 }
