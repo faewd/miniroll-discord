@@ -341,6 +341,7 @@ async function handleSpellCommand(
             }
             spell(id: $q) {
               id
+              name
             }
           }
         `,
@@ -381,9 +382,15 @@ async function handleSpellCommand(
         {
           type: ComponentType.MediaGallery,
           items: [{
-            media: { url: `https://fivee.co/snippets/spell-card/${spell.id}` },
-            description: `https://fivee.co/snippets/spell-card/${spell.id}`,
+            media: {
+              url: `https://fivee.co/snippets/spell-card/${spell.id}.png`,
+            },
+            description: `${spell.name} spell card`,
           }],
+        },
+        {
+          type: ComponentType.TextDisplay,
+          content: `-# https://fivee.co/snippets/spell-card/${spell.id}`,
         },
       ],
     };
