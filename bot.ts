@@ -14,7 +14,6 @@ import {
   APIInteraction,
   ButtonStyle,
   ComponentType,
-  EmbedType,
   InteractionType,
   MessageFlags,
   RESTPatchAPIInteractionFollowupJSONBody,
@@ -42,7 +41,7 @@ function response(
 ) {
   let flags = 0;
   if (ephemeral) flags |= MessageFlags.Ephemeral;
-  // if (components) flags |= MessageFlags.IsComponentsV2;
+  if (components) flags |= MessageFlags.IsComponentsV2;
   return json({
     type: 4,
     data: { content, flags },
@@ -346,7 +345,7 @@ async function handleSpellCommand(
       console.error(await res.text());
       return {
         components: [{
-          "type": 10,
+          "type": ComponentType.TextDisplay,
           "content": "Failed to fetch spell data.",
         }],
       };
@@ -357,7 +356,7 @@ async function handleSpellCommand(
     console.error(err);
     return {
       components: [{
-        "type": 10,
+        "type": ComponentType.TextDisplay,
         "content": "Unexpected error fetching spell data.",
       }],
     };
@@ -384,7 +383,7 @@ async function handleSpellCommand(
   if (data.spells.length === 0) {
     return {
       components: [{
-        "type": 10,
+        "type": ComponentType.TextDisplay,
         "content": "Couldn't find a spell with that name or ID.",
       }],
     };
@@ -394,7 +393,7 @@ async function handleSpellCommand(
     content: "Which spell?",
     components: [
       {
-        "type": 10,
+        "type": ComponentType.TextDisplay,
         "content": "**Which spell?**",
       },
       ...data.spells.map((spell: { id: string }) => ({
