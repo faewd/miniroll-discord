@@ -332,10 +332,10 @@ async function handleSpellCommand(
           query ($q: String!) {
             spells(filters:  {name_ilike: $q}) {
               id
+              name
             }
             spell(id: $q) {
               id
-              name
             }
           }
         `,
@@ -408,7 +408,6 @@ async function handleSpellCommand(
           type: ComponentType.Button,
           custom_id: `btn-${shortToken}-${spell.id}`,
           style: ButtonStyle.Primary,
-          message: spell.name,
           label: spell.name,
         })),
       },
