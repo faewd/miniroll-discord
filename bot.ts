@@ -41,14 +41,17 @@ kv.listenQueue(async (value) => {
       return;
     }
 
-    tryFollowUp(value.followUp, value.token, value.shortToken);
-
-    const continuations = kv.list({
+    const entries = kv.list({
       prefix: ["continuation", "btn", value.shortToken],
     });
+    entries.cursor;
+    const continuations = [];
+    for await (const e of entries) {
+      continuations.push(e);
+    }
 
-    for await (const cont of continuations) {
-      await kv.delete(cont.key);
+    if (continuations.length > 0) {
+      tryFollowUp(value.followUp, value.token, value.shortToken);
     }
   }
 
@@ -143,7 +146,8 @@ async function home(request: Request) {
   // BUTTON CLICK
   if (type === InteractionType.MessageComponent) {
     const buttonId = interaction.data.custom_id;
-    const { value } = await kv.get(["continuation", ...buttonId.split("-")]);
+    const continuation = buttonId.split("-");
+    const { value } = await kv.get(["continuation", ...continuation]);
     if (value === undefined) {
       return json({
         type: InteractionResponseType.UpdateMessage,
@@ -155,6 +159,15 @@ async function home(request: Request) {
           }],
         },
       });
+    }
+
+    const originalToken = continuation[1];
+    const continuations = kv.list({
+      prefix: ["continuation", "btn", originalToken],
+    });
+
+    for await (const cont of continuations) {
+      await kv.delete(cont.key);
     }
 
     return json({
