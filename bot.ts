@@ -161,14 +161,14 @@ async function home(request: Request) {
       });
     }
 
-    const originalToken = continuation[1];
-    const continuations = kv.list({
-      prefix: ["continuation", "btn", originalToken],
-    });
+    // const originalToken = continuation[1];
+    // const continuations = kv.list({
+    //   prefix: ["continuation", "btn", originalToken],
+    // });
 
-    for await (const cont of continuations) {
-      await kv.delete(cont.key);
-    }
+    // for await (const cont of continuations) {
+    //   await kv.delete(cont.key);
+    // }
 
     return json({
       type: InteractionResponseType.UpdateMessage,
