@@ -31,7 +31,7 @@ const BOT_TOKEN = Deno.env.get("BOT_TOKEN");
 
 const kv = await Deno.openKv();
 
-kv.listenQueue((value) => {
+kv.listenQueue(async (value) => {
   if (value.kind === "followUp") {
     if (
       !value.followUp || typeof value.followUp !== "object" || !value.token ||
@@ -42,6 +42,14 @@ kv.listenQueue((value) => {
     }
 
     tryFollowUp(value.followUp, value.token, value.shortToken);
+
+    const continuations = kv.list({
+      prefix: ["continuation", "btn", value.shortToken],
+    });
+
+    for await (const cont of continuations) {
+      await kv.delete(cont.key);
+    }
   }
 
   console.error(`Unexpected queue item: ${JSON.stringify(value)}`);
@@ -134,8 +142,8 @@ async function home(request: Request) {
 
   // BUTTON CLICK
   if (type === InteractionType.MessageComponent) {
-    const buttonid = interaction.data.custom_id;
-    const { value } = await kv.get(["continuation", buttonid]);
+    const buttonId = interaction.data.custom_id;
+    const { value } = await kv.get(["continuation", ...buttonId.split("-")]);
     if (value === undefined) {
       return json({
         type: InteractionResponseType.UpdateMessage,
@@ -472,7 +480,7 @@ async function handleSpellCommand(
 
   for (const spell of spellOptions) {
     kv.set(
-      ["continuation", `btn-${shortToken}-${spell.id}`],
+      ["continuation", "btn", "shortToken", spell.id],
       {
         components: [
           {
